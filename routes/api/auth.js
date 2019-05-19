@@ -3,11 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const auth = require('../../middleware/auth');
 const jwt = require('jsonwebtoken');
-const config = require('config');
-const {
-  check,
-  validationResult
-} = require('express-validator/check');
+const { check, validationResult } = require('express-validator/check');
 
 const User = require('../../models/User');
 
@@ -41,10 +37,7 @@ router.post(
       });
     }
 
-    const {
-      email,
-      password
-    } = req.body;
+    const { email, password } = req.body;
 
     try {
       let user = await User.findOne({
@@ -52,25 +45,25 @@ router.post(
       });
 
       if (!user) {
-        return res
-          .status(400)
-          .json({
-            errors: [{
+        return res.status(400).json({
+          errors: [
+            {
               msg: 'Invalid Credentials'
-            }]
-          });
+            }
+          ]
+        });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res
-          .status(400)
-          .json({
-            errors: [{
+        return res.status(400).json({
+          errors: [
+            {
               msg: 'Invalid Credentials'
-            }]
-          });
+            }
+          ]
+        });
       }
 
       const payload = {
@@ -81,7 +74,8 @@ router.post(
 
       jwt.sign(
         payload,
-        config.get('jwtSecret'), {
+        process.env.JWT_SECRET,
+        {
           expiresIn: 360000
         },
         (err, token) => {

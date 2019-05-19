@@ -1,13 +1,12 @@
 const express = require('express');
 const auth = require('../../middleware/auth');
 const request = require('request');
-const config = require('config');
 const User = require('../../models/User');
 const Profile = require('../../models/Profile');
-const {
-  check,
-  validationResult
-} = require('express-validator/check');
+const { check, validationResult } = require('express-validator/check');
+
+const githubuser = process.env.GITHUB_CLIENT;
+const githubsecret = process.env.GITHUB_SECRET;
 
 const router = express.Router();
 
@@ -41,11 +40,11 @@ router.post(
     auth,
     [
       check('status', 'Status is required')
-      .not()
-      .isEmpty(),
+        .not()
+        .isEmpty(),
       check('skills', 'Skills are required')
-      .not()
-      .isEmpty()
+        .not()
+        .isEmpty()
     ]
   ],
   async (req, res) => {
@@ -100,13 +99,17 @@ router.post(
 
       // Update profile
       if (profile) {
-        profile = await Profile.findOneAndUpdate({
-          user: req.user.id
-        }, {
-          $set: profileFields
-        }, {
-          new: true
-        });
+        profile = await Profile.findOneAndUpdate(
+          {
+            user: req.user.id
+          },
+          {
+            $set: profileFields
+          },
+          {
+            new: true
+          }
+        );
 
         return res.json(profile);
       }
@@ -196,14 +199,14 @@ router.put(
     auth,
     [
       check('title', 'Title is required')
-      .not()
-      .isEmpty(),
+        .not()
+        .isEmpty(),
       check('company', 'Company is required')
-      .not()
-      .isEmpty(),
+        .not()
+        .isEmpty(),
       check('from', 'From date is required')
-      .not()
-      .isEmpty()
+        .not()
+        .isEmpty()
     ]
   ],
   async (req, res) => {
@@ -284,17 +287,17 @@ router.put(
     auth,
     [
       check('school', 'School is required')
-      .not()
-      .isEmpty(),
+        .not()
+        .isEmpty(),
       check('degree', 'Degree is required')
-      .not()
-      .isEmpty(),
+        .not()
+        .isEmpty(),
       check('fieldofstudy', 'Field of study is required')
-      .not()
-      .isEmpty(),
+        .not()
+        .isEmpty(),
       check('from', 'From date is required')
-      .not()
-      .isEmpty()
+        .not()
+        .isEmpty()
     ]
   ],
   async (req, res) => {
@@ -373,9 +376,7 @@ router.get('/github/:username', (req, res) => {
     const options = {
       uri: `https://api.github.com/users/${
         req.params.username
-      }/repos?per_page=5&sort=created:asc&client_id=${config.get(
-        'githubClientId'
-      )}&client_secret=${config.get('githubSecret')}`,
+      }/repos?per_page=5&sort=created:asc&client_id=${githubuser}&client_secret=${githubsecret}`,
       method: 'GET',
       headers: {
         'user-agent': 'node.js'
